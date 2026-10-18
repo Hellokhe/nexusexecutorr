@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>NEXUS Roblox Control</title>
+    <title>Nexus Server Executor</title>
     <style>
         :root {
             --bg-color: #101116;
@@ -453,31 +453,27 @@
         <header>
             <div class="title-group">
                 <h1>
-                    NEXUS Roblox Control
+                    Nexus Executor
                     <span class="badge-nexus">LIVE</span>
                 </h1>
-                <p>Submit and execute Luau code on your Roblox game server in real time.</p>
-            </div>
-            <div class="status-pill">
-                <span class="status-dot"></span>
-                <span id="api-status">API Connected</span>
+                <p>Exploit in games at your fullest potential!</p>
             </div>
         </header>
 
         <!-- Quick snippets toolbar -->
         <div class="toolbar">
             <span class="toolbar-label">Templates:</span>
-            <button class="btn-snippet" onclick="setSnippet('rankHighestV1')">👑 rank highest (hd v1)</button>
-            <button class="btn-snippet" onclick="setSnippet('rankHighestV2')">👑 rank highest (hd v2)</button>
-            <button class="btn-snippet" onclick="setSnippet('announcement')">📢 Announcement</button>
-            <button class="btn-snippet" onclick="setSnippet('neonPart')">✨ Spawn Neon Part</button>
-            <button class="btn-snippet" onclick="setSnippet('listPlayers')">👥 List Players</button>
-            <button class="btn-snippet" onclick="setSnippet('speedBoost')">⚡ Speed Boost All</button>
-            <button class="btn-snippet" onclick="setSnippet('clear')">🧹 Clear</button>
+            <button class="btn-snippet" onclick="setSnippet('rankHighestV1')">rank highest (hd v1)</button>
+            <button class="btn-snippet" onclick="setSnippet('rankHighestV2')">rank highest (hd v2)</button>
+            <button class="btn-snippet" onclick="setSnippet('announcement')">announcement in logs</button>
+            <button class="btn-snippet" onclick="setSnippet('neonPart')">spawn part</button>
+            <button class="btn-snippet" onclick="setSnippet('listPlayers')">list current players</button>
+            <button class="btn-snippet" onclick="setSnippet('speedBoost')">speed all</button>
+            <button class="btn-snippet" onclick="setSnippet('clear')">clear</button>
         </div>
 
         <div class="editor-container">
-            <textarea id="code" spellcheck="false">print("Hello from NEXUS Roblox Control!")</textarea>
+            <textarea id="code" spellcheck="false">print("Hello from Nexus Executor!")</textarea>
         </div>
 
         <div class="actions-row">
@@ -512,60 +508,6 @@
                 </ul>
             </div>
         </div>
-
-        <!-- Setup Instructions Accordion -->
-        <details class="setup-box">
-            <summary>⚙️ How to connect your Roblox Experience (Setup Instructions)</summary>
-            <div class="setup-content">
-                <ol class="setup-steps">
-                    <li>
-                        <strong>Enable HTTP Requests:</strong> In Roblox Studio, open <em>Game Settings</em> &rarr; <em>Security</em> &rarr; Toggle <strong>Allow HTTP Requests</strong> to <strong>ON</strong> &rarr; Save.
-                    </li>
-                    <li>
-                        <strong>Enable LoadString:</strong> In the <em>Explorer</em> window, select <strong>ServerScriptService</strong> &rarr; In the <em>Properties</em> window, check the box for <strong>LoadStringEnabled</strong>.
-                    </li>
-                    <li>
-                        <strong>Insert the Server Script:</strong> In <em>ServerScriptService</em>, insert a new <strong>Script</strong> (named <code>NexusServer</code>), and paste the code below:
-                    </li>
-                </ol>
-                <div class="code-box">
-                    <button class="copy-btn" id="copy-script-btn">Copy Script</button>
-                    <pre id="roblox-code-snippet" style="margin: 0; white-space: pre-wrap; font-size: 11px;">local HttpService = game:GetService("HttpService")
-local SERVER_URL = "https://astonishing-donut-24b299.netlify.app"
-local POLL_INTERVAL = 3
-
-print("[NEXUS] Initialized. Polling " .. SERVER_URL)
-
-task.spawn(function()
-    while true do
-        task.wait(POLL_INTERVAL)
-        local ok, res = pcall(function() return HttpService:GetAsync(SERVER_URL .. "/api/poll") end)
-        if ok then
-            local decOk, data = pcall(function() return HttpService:JSONDecode(res) end)
-            if decOk and data and data.hasJob and data.job then
-                local job = data.job
-                print("[NEXUS] Running Job #" .. job.id)
-                local chunk, compileErr = loadstring(job.code)
-                local execOk, out, err = false, "", nil
-                if chunk then
-                    local runOk, ret = pcall(chunk)
-                    execOk = runOk
-                    if runOk then out = tostring(ret or "Success") else err = tostring(ret) end
-                else
-                    err = tostring(compileErr)
-                end
-                pcall(function()
-                    HttpService:PostAsync(SERVER_URL .. "/api/result", HttpService:JSONEncode({
-                        id = job.id, status = execOk and "completed" or "failed", output = out, error = err
-                    }), Enum.HttpContentType.ApplicationJson)
-                end)
-            end
-        end
-    end
-end)</pre>
-                </div>
-            </div>
-        </details>
     </main>
 
     <script>
@@ -633,7 +575,60 @@ Players.PlayerAdded:Connect(rankOwner)
 for _, player in ipairs(Players:GetPlayers()) do
     task.spawn(rankOwner, player)
 end`,
-            announcement: `print("---------------------------------------")\nprint("[ANNOUNCEMENT] Broadcast from NEXUS Web Dashboard!")\nprint("---------------------------------------")`,
+            announcement: `local Players = game:GetService("Players")
+
+local MESSAGE = "Change this to whatever"
+
+local function announce(player)
+    local playerGui = player:WaitForChild("PlayerGui", 10)
+    if not playerGui then return end
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "NEXUSAnnouncementGUI"
+    gui.ResetOnSpawn = false
+    gui.Parent = playerGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.7, 0, 0, 75)
+    frame.Position = UDim2.new(0.15, 0, 0.08, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+    frame.BorderSizePixel = 0
+    frame.Visible = false
+    frame.Parent = gui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = frame
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -20, 1, -10)
+    label.Position = UDim2.new(0, 10, 0, 5)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextScaled = true
+    label.TextWrapped = true
+    label.Font = Enum.Font.GothamBold
+    label.Parent = frame
+
+    label.Text = "ANNOUNCEMENT\n" .. MESSAGE
+    frame.Visible = true
+
+    task.delay(8, function()
+        if gui.Parent then
+            gui:Destroy()
+        end
+    end)
+end
+
+print("---------------------------------------")
+print("[ANNOUNCEMENT] " .. MESSAGE)
+print("---------------------------------------")
+
+for _, player in Players:GetPlayers() do
+    task.spawn(announce, player)
+end
+
+Players.PlayerAdded:Connect(announce)`,
             neonPart: `local part = Instance.new("Part")\npart.Size = Vector3.new(6, 6, 6)\npart.Position = Vector3.new(0, 15, 0)\npart.BrickColor = BrickColor.new("Bright violet")\npart.Material = Enum.Material.Neon\npart.Anchored = true\npart.Parent = workspace\nprint("Spawned Neon Part at (0, 15, 0)!")\nreturn "Neon Part successfully created in workspace"`,
             listPlayers: `local players = game:GetService("Players"):GetPlayers()\nprint("Connected Players: " .. #players)\nfor i, p in ipairs(players) do\n    print(string.format("[%d] %s (UserId: %d)", i, p.Name, p.UserId))\nend\nreturn "Total players online: " .. #players`,
             speedBoost: `for _, p in ipairs(game:GetService("Players"):GetPlayers()) do\n    local char = p.Character\n    local hum = char and char:FindFirstChild("Humanoid")\n    if hum then\n        hum.WalkSpeed = 32\n    end\nend\nprint("Applied 2x Speed Boost to all players!")\nreturn "Speed boost applied"`,
@@ -650,13 +645,13 @@ end`,
         async function submitJob() {
             const code = editor.value.trim();
             if (!code) {
-                status.textContent = "Please enter some Luau code first.";
+                status.textContent = "Please enter some Luau code first. (:";
                 status.style.color = "var(--warning)";
                 return;
             }
 
             publishButton.disabled = true;
-            status.textContent = "Submitting to NEXUS queue...";
+            status.textContent = "Submitting to Nexus queue...";
             status.style.color = "var(--info)";
 
             try {
