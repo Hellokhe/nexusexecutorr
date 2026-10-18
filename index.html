@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NEXUS Roblox Control</title>
+    <style>
+        :root {
+            --bg-color: #101116;
+            --card-bg: #161822;
+            --card-border: #282a36;
+            --editor-bg: #191b24;
+            --editor-border: #343642;
+            --editor-text: #b9f7c5;
+            --accent: #7865ff;
+            --accent-hover: #6552e6;
+            --accent-active: #5340d0;
+            --text-primary: #f2f2f7;
+            --text-secondary: #a4a6b3;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --info: #60a5fa;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px 20px 60px;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        main {
+            max-width: 960px;
+            margin: auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .title-group h1 {
+            margin: 0 0 6px 0;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-nexus {
+            background: linear-gradient(135deg, #7865ff, #a855f7);
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .title-group p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* Preset snippets toolbar */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-snippet {
+            background: #20222f;
+            border: 1px solid #343647;
+            color: #d1d5db;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-snippet:hover {
+            background: #2a2d3e;
+            border-color: #4b4e63;
+            color: #fff;
+        }
+
+        /* Editor Section */
+        .editor-container {
+            position: relative;
+        }
+
+        textarea#code {
+            width: 100%;
+            height: 380px;
+            padding: 18px;
+            border: 1px solid var(--editor-border);
+            border-radius: 10px;
+            background: var(--editor-bg);
+            color: var(--editor-text);
+            font: 14px/1.6 "Fira Code", Consolas, Monaco, "Courier New", monospace;
+            resize: vertical;
+            tab-size: 4;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea#code:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(120, 101, 255, 0.25);
+        }
+
+        .actions-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        button.btn-primary {
+            padding: 12px 24px;
+            border: 0;
+            border-radius: 8px;
+            background: var(--accent);
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        button.btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        button.btn-primary:active:not(:disabled) {
+            background: var(--accent-active);
+            transform: translateY(0);
+        }
+
+        button.btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        button.btn-secondary {
+            padding: 12px 18px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button.btn-secondary:hover {
+            color: var(--text-primary);
+            border-color: #4b4e63;
+        }
+
+        #status {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--editor-text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* History Card */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-body {
+            padding: 0;
+        }
+
+        .job-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            max-height: 440px;
+            overflow-y: auto;
+        }
+
+        .job-item {
+            padding: 14px 20px;
+            border-bottom: 1px solid #1f2230;
+            transition: background 0.15s;
+        }
+
+        .job-item:last-child {
+            border-bottom: none;
+        }
+
+        .job-item:hover {
+            background: #1c1e2b;
+        }
+
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .job-id {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .job-time {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .badge-status {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-pending {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .badge-running {
+            background: rgba(96, 165, 250, 0.15);
+            color: var(--info);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .badge-completed {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .badge-failed {
+            background: rgba(248, 113, 113, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+
+        .job-code {
+            font: 12px/1.5 monospace;
+            background: #111218;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: #d1d5db;
+            margin-bottom: 6px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .job-result {
+            font: 12px/1.4 monospace;
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-top: 4px;
+        }
+
+        .job-result.output {
+            background: rgba(52, 211, 153, 0.08);
+            border-left: 3px solid var(--success);
+            color: #a7f3d0;
+        }
+
+        .job-result.error {
+            background: rgba(248, 113, 113, 0.08);
+            border-left: 3px solid var(--danger);
+            color: #fca5a5;
+        }
+
+        .empty-state {
+            padding: 36px 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Setup instructions accordion */
+        details.setup-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-top: 24px;
+            padding: 16px 20px;
+        }
+
+        details.setup-box summary {
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            color: #d1d5db;
+            outline: none;
+            user-select: none;
+        }
+
+        details.setup-box summary:hover {
+            color: white;
+        }
+
+        .setup-content {
+            margin-top: 14px;
+            font-size: 13px;
+            color: #c0c2d0;
+            line-height: 1.6;
+        }
+
+        .setup-steps {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+
+        .setup-steps li {
+            margin-bottom: 8px;
+        }
+
+        .code-box {
+            background: #111218;
+            border: 1px solid #282a36;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #93c5fd;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #282a36;
+            color: #fff;
+            border: 0;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover {
+            background: #3e4255;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <header>
+            <div class="title-group">
+                <h1>
+                    NEXUS Roblox Control
+                    <span class="badge-nexus">LIVE</span>
+                </h1>
+                <p>Submit and execute Luau code on your Roblox game server in real time.</p>
+            </div>
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                <span id="api-status">API Connected</span>
+            </div>
+        </header>
+
+        <!-- Quick snippets toolbar -->
+        <div class="toolbar">
+            <span class="toolbar-label">Templates:</span>
+            <button class="btn-snippet" onclick="setSnippet('rankHighestV1')">👑 rank highest (hd v1)</button>
+            <button class="btn-snippet" onclick="setSnippet('rankHighestV2')">👑 rank highest (hd v2)</button>
+            <button class="btn-snippet" onclick="setSnippet('announcement')">📢 Announcement</button>
+            <button class="btn-snippet" onclick="setSnippet('neonPart')">✨ Spawn Neon Part</button>
+            <button class="btn-snippet" onclick="setSnippet('listPlayers')">👥 List Players</button>
+            <button class="btn-snippet" onclick="setSnippet('speedBoost')">⚡ Speed Boost All</button>
+            <button class="btn-snippet" onclick="setSnippet('clear')">🧹 Clear</button>
+        </div>
+
+        <div class="editor-container">
+            <textarea id="code" spellcheck="false">print("Hello from NEXUS Roblox Control!")</textarea>
+        </div>
+
+        <div class="actions-row">
+            <div class="btn-group">
+                <button id="publish" class="btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Execute on Roblox
+                </button>
+                <button id="refresh-btn" class="btn-secondary" title="Refresh job history">Refresh</button>
+                <button id="clear-btn" class="btn-secondary" title="Clear pending queue">Clear Queue</button>
+            </div>
+            <div id="status">Ready.</div>
+        </div>
+
+        <!-- Real-time Execution History & Logs -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Execution Queue &amp; Results Log
+                </h3>
+                <span id="queue-counter" style="font-size: 12px; color: var(--text-secondary);">0 jobs</span>
+            </div>
+            <div class="card-body">
+                <ul id="job-list" class="job-list">
+                    <li class="empty-state">No jobs executed yet. Submit Luau code above to start!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Setup Instructions Accordion -->
+        <details class="setup-box">
+            <summary>⚙️ How to connect your Roblox Experience (Setup Instructions)</summary>
+            <div class="setup-content">
+                <ol class="setup-steps">
+                    <li>
+                        <strong>Enable HTTP Requests:</strong> In Roblox Studio, open <em>Game Settings</em> &rarr; <em>Security</em> &rarr; Toggle <strong>Allow HTTP Requests</strong> to <strong>ON</strong> &rarr; Save.
+                    </li>
+                    <li>
+                        <strong>Enable LoadString:</strong> In the <em>Explorer</em> window, select <strong>ServerScriptService</strong> &rarr; In the <em>Properties</em> window, check the box for <strong>LoadStringEnabled</strong>.
+                    </li>
+                    <li>
+                        <strong>Insert the Server Script:</strong> In <em>ServerScriptService</em>, insert a new <strong>Script</strong> (named <code>NexusServer</code>), and paste the code below:
+                    </li>
+                </ol>
+                <div class="code-box">
+                    <button class="copy-btn" id="copy-script-btn">Copy Script</button>
+                    <pre id="roblox-code-snippet" style="margin: 0; white-space: pre-wrap; font-size: 11px;">local HttpService = game:GetService("HttpService")
+local SERVER_URL = "https://astonishing-donut-24b299.netlify.app"
+local POLL_INTERVAL = 3
+
+print("[NEXUS] Initialized. Polling " .. SERVER_URL)
+
+task.spawn(function()
+    while true do
+        task.wait(POLL_INTERVAL)
+        local ok, res = pcall(function() return HttpService:GetAsync(SERVER_URL .. "/api/poll") end)
+        if ok then
+            local decOk, data = pcall(function() return HttpService:JSONDecode(res) end)
+            if decOk and data and data.hasJob and data.job then
+                local job = data.job
+                print("[NEXUS] Running Job #" .. job.id)
+                local chunk, compileErr = loadstring(job.code)
+                local execOk, out, err = false, "", nil
+                if chunk then
+                    local runOk, ret = pcall(chunk)
+                    execOk = runOk
+                    if runOk then out = tostring(ret or "Success") else err = tostring(ret) end
+                else
+                    err = tostring(compileErr)
+                end
+                pcall(function()
+                    HttpService:PostAsync(SERVER_URL .. "/api/result", HttpService:JSONEncode({
+                        id = job.id, status = execOk and "completed" or "failed", output = out, error = err
+                    }), Enum.HttpContentType.ApplicationJson)
+                end)
+            end
+        end
+    end
+end)</pre>
+                </div>
+            </div>
+        </details>
+    </main>
+
+    <script>
+        const editor = document.getElementById("code");
+        const status = document.getElementById("status");
+        const publishButton = document.getElementById("publish");
+        const refreshButton = document.getElementById("refresh-btn");
+        const clearButton = document.getElementById("clear-btn");
+        const jobList = document.getElementById("job-list");
+        const queueCounter = document.getElementById("queue-counter");
+        const copyScriptBtn = document.getElementById("copy-script-btn");
+
+        const snippets = {
+            rankHighestV1: `local Players = game:GetService("Players")
+
+local USERNAME = "maxedout3665"
+
+local function setupPlayer(player)
+    if player.Name:lower() ~= USERNAME then
+        return
+    end
+
+    local hdMain = game:GetService("ReplicatedStorage"):WaitForChild("HDAdminSetup")
+    local main = require(hdMain):GetMain()
+    local api = main:GetModule("API")
+
+    api:SetRank(player, 5, "Perm")
+end
+
+Players.PlayerAdded:Connect(setupPlayer)
+
+for _, player in ipairs(Players:GetPlayers()) do
+    task.spawn(setupPlayer, player)
+end`,
+            rankHighestV2: `local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local USERNAME = "maxedout3665"
+
+local function rankOwner(player)
+    if player.Name:lower() ~= USERNAME then
+        return
+    end
+
+    local success, result = pcall(function()
+        local setup = require(
+            ReplicatedStorage:WaitForChild("HDAdminSetup")
+        )
+
+        local main = setup:GetMain()
+        local api = main:GetModule("API")
+
+        api:SetRank(player, "Owner", "Server")
+    end)
+
+    if success then
+        print("Assigned HD Admin Owner rank to " .. player.Name)
+    else
+        warn("HD Admin rank assignment failed: " .. tostring(result))
+    end
+end
+
+Players.PlayerAdded:Connect(rankOwner)
+
+for _, player in ipairs(Players:GetPlayers()) do
+    task.spawn(rankOwner, player)
+end`,
+            announcement: `print("---------------------------------------")\nprint("[ANNOUNCEMENT] Broadcast from NEXUS Web Dashboard!")\nprint("---------------------------------------")`,
+            neonPart: `local part = Instance.new("Part")\npart.Size = Vector3.new(6, 6, 6)\npart.Position = Vector3.new(0, 15, 0)\npart.BrickColor = BrickColor.new("Bright violet")\npart.Material = Enum.Material.Neon\npart.Anchored = true\npart.Parent = workspace\nprint("Spawned Neon Part at (0, 15, 0)!")\nreturn "Neon Part successfully created in workspace"`,
+            listPlayers: `local players = game:GetService("Players"):GetPlayers()\nprint("Connected Players: " .. #players)\nfor i, p in ipairs(players) do\n    print(string.format("[%d] %s (UserId: %d)", i, p.Name, p.UserId))\nend\nreturn "Total players online: " .. #players`,
+            speedBoost: `for _, p in ipairs(game:GetService("Players"):GetPlayers()) do\n    local char = p.Character\n    local hum = char and char:FindFirstChild("Humanoid")\n    if hum then\n        hum.WalkSpeed = 32\n    end\nend\nprint("Applied 2x Speed Boost to all players!")\nreturn "Speed boost applied"`,
+            clear: ""
+        };
+
+        function setSnippet(key) {
+            if (snippets[key] !== undefined) {
+                editor.value = snippets[key];
+                editor.focus();
+            }
+        }
+
+        async function submitJob() {
+            const code = editor.value.trim();
+            if (!code) {
+                status.textContent = "Please enter some Luau code first.";
+                status.style.color = "var(--warning)";
+                return;
+            }
+
+            publishButton.disabled = true;
+            status.textContent = "Submitting to NEXUS queue...";
+            status.style.color = "var(--info)";
+
+            try {
+                // Post to /api/jobs (also compatible with /api/code)
+                const response = await fetch("/api/jobs", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ code: code })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || ("Server returned " + response.status));
+                }
+
+                const jobId = result.job ? result.job.id : result.version;
+                status.textContent = `Queued Job #${jobId}. Waiting for Roblox server...`;
+                status.style.color = "var(--editor-text)";
+
+                // Refresh history list immediately
+                await fetchJobs();
+
+                // Poll for updates every 1.5 seconds for up to 30 seconds
+                trackJobStatus(jobId);
+            } catch (error) {
+                status.textContent = "Error: " + error.message;
+                status.style.color = "var(--danger)";
+            } finally {
+                publishButton.disabled = false;
+            }
+        }
+
+        let pollTimer = null;
+        function trackJobStatus(jobId) {
+            if (pollTimer) clearInterval(pollTimer);
+            let attempts = 0;
+
+            pollTimer = setInterval(async () => {
+                attempts++;
+                const jobs = await fetchJobs();
+                const currentJob = jobs.find(j => j.id === jobId);
+
+                if (currentJob) {
+                    if (currentJob.status === "completed") {
+                        status.textContent = `✓ Job #${jobId} executed successfully by Roblox!`;
+                        status.style.color = "var(--success)";
+                        clearInterval(pollTimer);
+                    } else if (currentJob.status === "failed") {
+                        status.textContent = `✗ Job #${jobId} failed on Roblox: ${currentJob.error || 'Unknown error'}`;
+                        status.style.color = "var(--danger)";
+                        clearInterval(pollTimer);
+                    } else if (currentJob.status === "running") {
+                        status.textContent = `⚡ Roblox server is running Job #${jobId}...`;
+                        status.style.color = "var(--info)";
+                    }
+                }
+
+                if (attempts > 20) {
+                    clearInterval(pollTimer);
+                }
+            }, 1500);
+        }
+
+        async function fetchJobs() {
+            try {
+                const response = await fetch("/api/jobs?limit=25");
+                if (!response.ok) return [];
+                const data = await response.json();
+                const jobs = data.jobs || [];
+                renderJobs(jobs);
+                return jobs;
+            } catch (err) {
+                console.warn("Could not fetch jobs:", err);
+                return [];
+            }
+        }
+
+        function renderJobs(jobs) {
+            queueCounter.textContent = `${jobs.length} job${jobs.length === 1 ? '' : 's'}`;
+
+            if (!jobs || jobs.length === 0) {
+                jobList.innerHTML = `<li class="empty-state">No jobs executed yet. Submit Luau code above to start!</li>`;
+                return;
+            }
+
+            jobList.innerHTML = jobs.map(job => {
+                const timeStr = job.createdAt ? new Date(job.createdAt).toLocaleTimeString() : "";
+                const statusClass = `badge-${job.status}`;
+                const outputHtml = job.output ? `<div class="job-result output"><strong>Output:</strong> ${escapeHtml(job.output)}</div>` : "";
+                const errorHtml = job.error ? `<div class="job-result error"><strong>Error:</strong> ${escapeHtml(job.error)}</div>` : "";
+
+                return `
+                    <li class="job-item">
+                        <div class="job-header">
+                            <div>
+                                <span class="job-id">Job #${job.id}</span>
+                                <span class="job-time">${timeStr}</span>
+                            </div>
+                            <span class="badge-status ${statusClass}">${job.status}</span>
+                        </div>
+                        <pre class="job-code">${escapeHtml(job.code)}</pre>
+                        ${outputHtml}
+                        ${errorHtml}
+                    </li>
+                `;
+            }).join("");
+        }
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        async function clearQueue() {
+            if (!confirm("Clear all jobs from queue history?")) return;
+            try {
+                const res = await fetch("/api/jobs/clear", { method: "POST" });
+                if (res.ok) {
+                    status.textContent = "Queue cleared.";
+                    status.style.color = "var(--text-secondary)";
+                    await fetchJobs();
+                }
+            } catch (err) {
+                alert("Failed to clear queue: " + err.message);
+            }
+        }
+
+        // Copy Roblox script button
+        copyScriptBtn.addEventListener("click", () => {
+            const scriptText = document.getElementById("roblox-code-snippet").textContent;
+            navigator.clipboard.writeText(scriptText).then(() => {
+                const oldText = copyScriptBtn.textContent;
+                copyScriptBtn.textContent = "Copied!";
+                setTimeout(() => copyScriptBtn.textContent = oldText, 2000);
+            });
+        });
+
+        publishButton.addEventListener("click", submitJob);
+        refreshButton.addEventListener("click", fetchJobs);
+        clearButton.addEventListener("click", clearQueue);
+
+        // Initial load
+        fetchJobs();
+        // Periodic background poll every 6s
+        setInterval(fetchJobs, 6000);
+    </script>
+</body>
+
+</html>

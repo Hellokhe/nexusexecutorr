@@ -1,0 +1,33 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/health"
+  to = "/.netlify/functions/api/health"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/poll"
+  to = "/.netlify/functions/api/poll"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/result"
+  to = "/.netlify/functions/api/result"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/jobs"
+  to = "/.netlify/functions/api/jobs"
+  status = 200
+
+[[redirects]]
+  from = "/.netlify/functions/code"
+  to = "/.netlify/functions/api/code"
+  status = 200
