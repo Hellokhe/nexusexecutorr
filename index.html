@@ -788,14 +788,19 @@ Players.PlayerAdded:Connect(announce)`,
         }
 
         // Copy Roblox script button
-        copyScriptBtn.addEventListener("click", () => {
-            const scriptText = document.getElementById("roblox-code-snippet").textContent;
-            navigator.clipboard.writeText(scriptText).then(() => {
-                const oldText = copyScriptBtn.textContent;
-                copyScriptBtn.textContent = "Copied!";
-                setTimeout(() => copyScriptBtn.textContent = oldText, 2000);
+        if (copyScriptBtn) {
+            copyScriptBtn.addEventListener("click", () => {
+                const scriptSnippet = document.getElementById("roblox-code-snippet");
+                if (!scriptSnippet) return;
+
+                const scriptText = scriptSnippet.textContent;
+                navigator.clipboard.writeText(scriptText).then(() => {
+                    const oldText = copyScriptBtn.textContent;
+                    copyScriptBtn.textContent = "Copied!";
+                    setTimeout(() => copyScriptBtn.textContent = oldText, 2000);
+                });
             });
-        });
+        }
 
         publishButton.addEventListener("click", submitJob);
         refreshButton.addEventListener("click", fetchJobs);
