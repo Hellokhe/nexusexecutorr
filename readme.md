@@ -159,21 +159,11 @@ end)
 
 ---
 
-## 🌐 Netlify Deployment Instructions
+## 🌐 Deployment Instructions
 
-Your site is pre-configured for automatic Netlify deployment:
+GitHub Pages only publishes the static dashboard; it does not run the API or Netlify Functions. The dashboard sends API requests to `API_BASE_URL` near the top of the inline script in `index.html`. To use the dashboard, deploy this project to Netlify (including its function and database setup), confirm `/health` returns JSON with `"status": "online"`, and set `API_BASE_URL` to that site's origin. The Roblox script's `SERVER_URL` in `roblox/NexusServer.luau` must use the same origin.
 
-1. **Automatic Build & Deploy:**
-   - Netlify serves `index.html` from the root directory.
-   - Netlify deploys functions in `netlify/functions/` automatically.
-   - Netlify Database migrations in `netlify/database/migrations/` apply automatically at deploy time.
-
-2. **No Environment Variables or Auth Setup Needed:**
-   - The system is completely authentication-free.
-   - No API keys, tokens, or passwords need to be set in the Netlify Dashboard.
-
-3. **Custom Domain / URLs:**
-   - If your site URL changes, update `SERVER_URL` in the Roblox script (`roblox/NexusServer.luau`) to match your new URL.
+The GitHub Pages workflow does not deploy the Netlify backend. A Netlify deployment must be configured separately; if you use GitHub Pages for the dashboard, its requests are sent cross-origin and require the API's CORS headers.
 
 ---
 

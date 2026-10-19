@@ -511,6 +511,7 @@
     </main>
 
     <script>
+        const API_BASE_URL = "https://astonishing-donut-24b299.netlify.app";
         const editor = document.getElementById("code");
         const status = document.getElementById("status");
         const publishButton = document.getElementById("publish");
@@ -642,6 +643,27 @@ Players.PlayerAdded:Connect(announce)`,
             }
         }
 
+        async function requestApi(path, options) {
+            const response = await fetch(`${API_BASE_URL}${path}`, options);
+            const responseText = await response.text();
+            let result;
+
+            try {
+                result = responseText ? JSON.parse(responseText) : {};
+            } catch {
+                throw new Error(
+                    `The API at ${API_BASE_URL} returned HTTP ${response.status} instead of JSON. ` +
+                    "The backend may not be deployed or configured."
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error(result.error || `API request failed with HTTP ${response.status}.`);
+            }
+
+            return result;
+        }
+
         async function submitJob() {
             const code = editor.value.trim();
             if (!code) {
@@ -655,20 +677,13 @@ Players.PlayerAdded:Connect(announce)`,
             status.style.color = "var(--info)";
 
             try {
-                // Post to /api/jobs (also compatible with /api/code)
-                const response = await fetch("/api/jobs", {
+                const result = await requestApi("/api/jobs", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({ code: code })
                 });
-
-                const result = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(result.error || ("Server returned " + response.status));
-                }
 
                 const jobId = result.job ? result.job.id : result.version;
                 status.textContent = `Queued Job #${jobId}. Waiting for Roblox server...`;
@@ -720,9 +735,7 @@ Players.PlayerAdded:Connect(announce)`,
 
         async function fetchJobs() {
             try {
-                const response = await fetch("/api/jobs?limit=25");
-                if (!response.ok) return [];
-                const data = await response.json();
+                const data = await requestApi("/api/jobs?limit=25");
                 const jobs = data.jobs || [];
                 renderJobs(jobs);
                 return jobs;
@@ -776,14 +789,13 @@ Players.PlayerAdded:Connect(announce)`,
         async function clearQueue() {
             if (!confirm("Clear all jobs from queue history?")) return;
             try {
-                const res = await fetch("/api/jobs/clear", { method: "POST" });
-                if (res.ok) {
-                    status.textContent = "Queue cleared.";
-                    status.style.color = "var(--text-secondary)";
-                    await fetchJobs();
-                }
+                await requestApi("/api/jobs/clear", { method: "POST" });
+                status.textContent = "Queue cleared.";
+                status.style.color = "var(--text-secondary)";
+                await fetchJobs();
             } catch (err) {
-                alert("Failed to clear queue: " + err.message);
+                status.textContent = "Failed to clear queue: " + err.message;
+                status.style.color = "var(--danger)";
             }
         }
 
