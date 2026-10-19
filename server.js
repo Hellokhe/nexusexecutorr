@@ -63,18 +63,17 @@ function handleCreateJob(req, res) {
 }
 
 app.post("/api/jobs", handleCreateJob);
+app.put("/api/jobs", handleCreateJob);
 app.post("/api/code", handleCreateJob);
 app.put("/api/code", handleCreateJob);
 
-// Poll pending job for Roblox: GET /api/poll or /api/jobs/pending
-app.get(["/api/poll", "/api/jobs/pending"], (req, res) => {
-  // Find oldest pending job
+function getPendingJobPayload() {
   const pending = [...jobs].reverse().find(j => j.status === "pending");
 
   if (pending) {
     pending.status = "running";
     pending.updatedAt = new Date().toISOString();
-    return res.json({
+    return {
       hasJob: true,
       job: {
         id: pending.id,
@@ -82,15 +81,23 @@ app.get(["/api/poll", "/api/jobs/pending"], (req, res) => {
         status: pending.status,
         createdAt: pending.createdAt
       }
-    });
+    };
   }
 
-  // Empty queue - return valid JSON
-  res.json({
+  return {
     hasJob: false,
     job: null,
     message: "No pending jobs in queue."
-  });
+  };
+}
+
+// Poll pending job for Roblox: GET /api/poll or /api/jobs/pending
+app.get(["/api/poll", "/api/jobs/pending"], (req, res) => {
+  res.json(getPendingJobPayload());
+});
+
+app.post(["/api/poll", "/api/jobs/pending"], (req, res) => {
+  res.json(getPendingJobPayload());
 });
 
 // Record execution result: POST /api/result or /api/jobs/result
@@ -142,6 +149,10 @@ app.delete("/api/jobs", (req, res) => {
 
 // Read current / latest code: GET /api/code
 app.get("/api/code", (req, res) => {
+  if (req.query.poll === "1") {
+    return res.json(getPendingJobPayload());
+  }
+
   const latest = jobs[0];
   res.json({
     success: true,
